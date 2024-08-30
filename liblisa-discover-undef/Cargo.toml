@@ -1,0 +1,18 @@
+[package]
+name = "liblisa-discover-undef"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.10"
+liblisa = { path = "../../liblisa/liblisa", features = ["x64-undef"] }
+liblisa-progress = { path = "../liblisa-progress" }
+serde_json = "1.0"
+clap = { version = "4.4.8", features = ["derive"] }
+rayon = "1.5"
+log = "0.4"
+rand = "0.8.5"
+itertools = "0.12.0"
+
+[dev-dependencies]
+test-log = "0.2.10"

@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "kparser",
+    "liblisa-dasgupta-compare",
+    "liblisa-xed-compare",
+    "liblisa-discover-undef",
+    "liblisa-instr-coverage", "liblisa-progress",
+]
+
+[profile.release]
+lto = "fat"
+debug = true
+codegen-units = 1
+opt-level = 3

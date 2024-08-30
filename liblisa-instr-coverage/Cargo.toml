@@ -1,0 +1,21 @@
+[package]
+name = "liblisa-instr-coverage"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.10"
+liblisa = { path = "../../liblisa/liblisa" }
+liblisa-enc = { path = "../../liblisa/liblisa-enc" }
+liblisa-x64-observer = { path = "../../liblisa/arch/x64/liblisa-x64-observer" }
+serde_json = "1.0"
+jemallocator = "0.5"
+clap = { version = "4.4.8", features = ["derive"] }
+xed-sys = "0.5"
+elf = "0.7.4"
+rayon = "1.10.0"
+rand = "0.8.5"
+log = "0.4.21"
+
+[dev-dependencies]
+test-log = "0.2.10"

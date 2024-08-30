@@ -1,0 +1,24 @@
+[package]
+name = "liblisa-dasgupta-compare"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+liblisa = { path = "../../liblisa/liblisa", features = ["z3"] }
+liblisa-progress = { path = "../liblisa-progress" }
+kparser = { path = "../kparser" }
+serde_json = { version = "1.0", features = ["unbounded_depth"] }
+clap = { version = "4.4.8", features = ["derive"] }
+rayon = "1.5"
+rand = "0.8"
+libopcodes-rs = "0.1.4"
+arrayvec = "0.7"
+serde = { version = "1.0", features = [ "derive" ] }
+regex = "1.10.2"
+env_logger = "0.10"
+log = "0.4"
+itertools = "0.12.0"
+z3 = { git = 'https://github.com/prove-rs/z3.rs' }
+
+[dev-dependencies]
+test-log = "0.2.10"

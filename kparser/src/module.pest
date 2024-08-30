@@ -1,0 +1,75 @@
+first_c = _{ 'a'..'z' | 'A'..'Z' | "_" | "-" }
+c = _{ first_c | '0'..'9' }
+ident = { !keyword ~ first_c ~ c* }
+reg = { "%" ~ ident }
+
+whitespace = _{ (WHITE_SPACE | NEWLINE) }
+single_line_comment = _{ "//" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
+multi_line_comment = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+spacing = _{ (whitespace|single_line_comment|multi_line_comment)* }
+
+quote = _{ "\"" }
+string_content = { (!quote ~ ANY)* }
+string = _{ quote ~ string_content ~ quote ~ spacing }
+
+num = { ASCII_DIGIT+ }
+hex = { ASCII_HEX_DIGIT+ }
+hex_with_prefix = _{ "0x" ~ hex }
+imm = { dollarydoo ~ hex_with_prefix }
+
+keyword = { "module" | "requires" | "import" | "endmodule" | "context" | "rule" }
+
+args = _{ (terms_without_list ~ ("," ~ spacing ~ terms_without_list)*)? }
+fun = { ident ~ spacing ~ "(" ~ spacing ~ args ~ ")" ~ spacing }
+special = { "true" | "false" | "undefBool" | "undefMInt64" | "undefMInt32" | "undefMInt16" | "undefMInt8" | "undefMInt" }
+lit = _{ (special | string | imm | hex_with_prefix | num) ~ spacing }
+var = { ident ~ spacing }
+dollarydoo = { "$" }
+execinstr = { "execinstr" ~ spacing ~ "(" ~ spacing ~ term ~ term ~ ")" ~ spacing }
+nil = { "." ~ ident ~ spacing ~ spacing }
+anything = { ":_" ~ spacing }
+knil = { !"..." ~ "." ~ spacing }
+ite = { "#ifMInt" ~ spacing ~ term ~ "#then" ~ spacing ~ term ~ "#else" ~ spacing ~ term ~ "#fi" ~ spacing }
+cast = { "{" ~ spacing ~ expr ~ "}" ~ spacing ~ ":>" ~ spacing ~ ident ~ spacing }
+
+mapping = { "|->" ~ spacing ~ term_without_list }
+op = { "==Bool" | "==Int" | "+Int" | "-Int" | "*Int" | "+" | "xorBool" | "orBool" | "andBool" }
+typed = { ":" ~ spacing ~ ident ~ spacing }
+lookup = { "[" ~ spacing ~ expr ~ "]" }
+list = { ("," ~ spacing ~ term_without_list)+ }
+binop = { op ~ spacing ~ term_without_list }
+infix = _{ mapping | binop | typed | lookup }
+
+unop = { "notBool" }
+unaryop = { unop ~ spacing ~ term_without_list }
+parens = { "(" ~ spacing ~ terms ~ ")" ~ spacing }
+subterm = _{ (cast|ite|execinstr|fun|lit|unaryop|var|reg ~ spacing|anything|nil|knil|parens|dollarydoo) ~ spacing }
+term_without_list = { subterm ~ infix* ~ spacing }
+term = { subterm ~ (infix|list)* ~ spacing }
+terms = { term ~ (term)* }
+terms_without_list = { term_without_list ~ (term_without_list)* }
+
+trace = { terms ~ ("~>" ~ spacing ~ terms)* }
+expr = _{ trace ~ spacing }
+root_expr = _{ SOI ~ spacing ~ expr ~ EOI }
+
+rewrite = { expr ~ ("=>" ~ spacing ~ expr)? }
+root_rewrite = _{ SOI ~ spacing ~ rewrite ~ EOI }
+
+structural_framing = { "..." }
+cell = { "<" ~ spacing ~ PUSH(ident) ~ spacing ~ ">" ~ spacing ~ structural_framing? ~ spacing ~ rewrite ~ spacing ~ structural_framing? ~ spacing ~ "</" ~ spacing ~ POP ~ spacing ~ ">" ~ spacing }
+rule_requires = { "requires" ~ spacing ~ expr }
+rule = { cell* ~ rule_requires* }
+kw_rule = _{ "rule" ~ spacing ~ rule }
+
+context = { "context" ~ spacing ~ subterm ~ "[" ~ spacing ~ expr ~ "]" ~ spacing }
+imports = { "imports" ~ spacing ~ ident ~ spacing }
+statement = _{ (imports|context|kw_rule) ~ spacing }
+statements = _{ (!endmodule ~ statement)* }
+
+endmodule = _{ "endmodule" ~ spacing }
+module = { "module" ~ spacing ~ ident ~ spacing ~ statements ~ endmodule }
+requires = { "requires" ~ spacing ~ string }
+
+declaration = _{ module|requires }
+declarations = _{ SOI ~ spacing ~ declaration* ~ EOI }
